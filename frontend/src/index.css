@@ -443,6 +443,10 @@ table td { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size
   outline: none; 
   box-shadow: 0 0 0 6px var(--primary-light-alpha); 
 }
+select.form-input {
+  padding-top: 0;
+  padding-bottom: 0;
+}
 
 /* Modals Excellence */
 .modal-overlay {
