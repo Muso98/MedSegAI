@@ -10,10 +10,8 @@ venv/
 dist/
 build/
 
-# AI Models (large files)
-ai_models/*.pth
-ai_models/*.pt
-ai_models/*.bin
+# AI Models
+# Using Git LFS for large model files
 
 # Media (patient data — never commit!)
 backend/media/
