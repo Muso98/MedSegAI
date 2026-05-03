@@ -1,0 +1,42 @@
+# Git ignore
+.env
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# AI Models (large files)
+ai_models/*.pth
+ai_models/*.pt
+ai_models/*.bin
+
+# Media (patient data — never commit!)
+backend/media/
+media/
+scratch/
+
+# Database
+*.db
+*.sqlite3
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# SSL certs
+nginx/ssl/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp

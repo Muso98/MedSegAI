@@ -1,0 +1,127 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: medsegai_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-medsegai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-medsegai_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-medsegai}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-medsegai}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - medsegai_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: medsegai_redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_secret}
+    volumes:
+      - redis_data:/data
+    networks:
+      - medsegai_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medsegai_backend
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - media_data:/app/media
+      - ./backend:/app
+      - ./ai_models:/app/ai_models:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - medsegai_net
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2"
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medsegai_celery
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - media_data:/app/media
+      - ./backend:/app
+      - ./ai_models:/app/ai_models:ro
+    depends_on:
+      - backend
+      - redis
+    networks:
+      - medsegai_net
+    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=2
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medsegai_beat
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+    networks:
+      - medsegai_net
+    command: celery -A app.tasks.celery_app beat --loglevel=info
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: medsegai_frontend
+    restart: unless-stopped
+    networks:
+      - medsegai_net
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: medsegai_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - media_data:/app/media:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - medsegai_net
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_data:
+
+networks:
+  medsegai_net:
+    driver: bridge
