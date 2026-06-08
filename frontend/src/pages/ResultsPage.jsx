@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api, { studiesAPI, resultsAPI } from '@/api/client'
 import { useAuthStore } from '@/store/authStore'
 import toast from 'react-hot-toast'
+import MeasurementTool from '@/components/MeasurementTool'
 import {
   ArrowLeft, FileDown, Eye, EyeOff,
   Activity, Target, Clock,
@@ -41,6 +42,7 @@ export default function ResultsPage() {
   const { user } = useAuthStore()
   const qc = useQueryClient()
   const [showMask, setShowMask] = useState(true)
+  const [isMeasuring, setIsMeasuring] = useState(false)
   const [opacity, setOpacity] = useState(0.8)
   const [validationNotes, setValidationNotes] = useState('')
   const [isDownloading, setIsDownloading] = useState(false)
@@ -77,7 +79,7 @@ export default function ResultsPage() {
     queryFn: () => resultsAPI.byStudy(studyId).then(r => r.data),
     placeholderData: (prev) => prev,
     refetchInterval: (data) => !data ? 5000 : false,
-    retry: 10,
+    retry: 1,
     retryDelay: 3000,
   })
 
@@ -236,8 +238,12 @@ export default function ResultsPage() {
                   </button>
                   <button 
                     className="btn btn-ghost" 
-                    style={{ padding: 10, borderRadius: 12 }}
-                    onClick={() => toast('Tizim kalibrlanmagan. O\'lchash xizmati keyingi versiyada qo\'shiladi', { icon: '📏' })}
+                    style={{ 
+                      padding: 10, borderRadius: 12,
+                      background: isMeasuring ? 'var(--primary)' : 'transparent',
+                      color: isMeasuring ? 'white' : 'inherit'
+                    }}
+                    onClick={() => setIsMeasuring(!isMeasuring)}
                     title="O'lchash"
                   >
                     <Ruler size={18} />
@@ -257,6 +263,7 @@ export default function ResultsPage() {
                   </div>
                   <div style={{ background: '#000', borderRadius: 32, overflow: 'hidden', border: '2px solid var(--border)', aspectRatio: '1/1', position: 'relative' }}>
                     <SecureImage src={`/studies/${studyId}/image`} alt="Original MRI" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    <MeasurementTool isActive={isMeasuring} />
                   </div>
                 </div>
 
