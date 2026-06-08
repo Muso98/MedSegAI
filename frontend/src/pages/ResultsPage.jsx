@@ -26,7 +26,7 @@ const SecureImage = ({ src, alt, style }) => {
     return () => { if (objectUrl) URL.revokeObjectURL(objectUrl) }
   }, [src])
   return imgSrc ? (
-    <img src={imgSrc} alt={alt} style={{ ...style, transition: 'all 0.6s cubic-bezier(0.16,1,0.3,1)' }} />
+    <img src={imgSrc} alt={alt} draggable={false} style={{ ...style, transition: 'all 0.6s cubic-bezier(0.16,1,0.3,1)', userSelect: 'none' }} />
   ) : (
     <div style={{ ...style, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', background: 'var(--bg-base)' }}>
       <Loader2 className="animate-spin text-primary" size={32} style={{ marginBottom: 12 }} />
