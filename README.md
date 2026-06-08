@@ -96,9 +96,9 @@ AI_DEVICE=auto  # cuda agar GPU bo'lsa
 mkdir -p nginx/ssl
 # Let's Encrypt (tavsiya):
 sudo apt install certbot
-sudo certbot certonly --standalone -d your-domain.com
-sudo cp /etc/letsencrypt/live/your-domain.com/fullchain.pem nginx/ssl/
-sudo cp /etc/letsencrypt/live/your-domain.com/privkey.pem nginx/ssl/
+sudo certbot certonly --standalone -d brainweb.uz -d www.brainweb.uz
+sudo cp /etc/letsencrypt/live/brainweb.uz/fullchain.pem nginx/ssl/
+sudo cp /etc/letsencrypt/live/brainweb.uz/privkey.pem nginx/ssl/
 
 # YOKI self-signed (test uchun):
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
@@ -115,7 +115,7 @@ docker compose logs -f   # Loglarni kuzatish
 ### 7. Tekshirish
 
 ```bash
-curl https://your-domain.com/api/v1/health
+curl https://brainweb.uz/api/v1/health
 # → {"status": "ok", "app": "MedSegAI"}
 ```
 
@@ -146,7 +146,7 @@ Rol:   Administrator
 
 ## 🌐 API Endpoints
 
-`DEBUG=true` holatida: `https://your-domain.com/docs`
+`DEBUG=true` holatida: `https://brainweb.uz/docs`
 
 ---
 
