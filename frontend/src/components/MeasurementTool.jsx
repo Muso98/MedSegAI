@@ -5,23 +5,28 @@ export default function MeasurementTool({ isActive }) {
   const [currentLine, setCurrentLine] = useState(null);
   const containerRef = useRef(null);
 
-  const handleMouseDown = (e) => {
+  const getCoordinates = (e) => {
+    const rect = containerRef.current.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  };
+
+  const handleStart = (e) => {
     if (!isActive) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    setCurrentLine({ start: { x, y }, end: { x, y } });
+    if (e.type.startsWith('touch')) document.body.style.overflow = 'hidden'; // prevent scroll
+    const coords = getCoordinates(e);
+    setCurrentLine({ start: coords, end: coords });
   };
 
-  const handleMouseMove = (e) => {
+  const handleMove = (e) => {
     if (!isActive || !currentLine) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    setCurrentLine(prev => ({ ...prev, end: { x, y } }));
+    const coords = getCoordinates(e);
+    setCurrentLine(prev => ({ ...prev, end: coords }));
   };
 
-  const handleMouseUp = () => {
+  const handleEnd = () => {
+    document.body.style.overflow = ''; // restore scroll
     if (!isActive || !currentLine) return;
     if (
       Math.abs(currentLine.start.x - currentLine.end.x) > 5 ||
@@ -49,10 +54,14 @@ export default function MeasurementTool({ isActive }) {
         pointerEvents: isActive ? 'auto' : 'none',
         cursor: isActive ? 'crosshair' : 'default'
       }}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onMouseDown={handleStart}
+      onMouseMove={handleMove}
+      onMouseUp={handleEnd}
+      onMouseLeave={handleEnd}
+      onTouchStart={handleStart}
+      onTouchMove={handleMove}
+      onTouchEnd={handleEnd}
+      onTouchCancel={handleEnd}
     >
       <svg style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}>
         {[...lines, currentLine].filter(Boolean).map((line, i) => {
