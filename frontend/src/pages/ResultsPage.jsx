@@ -219,13 +219,34 @@ export default function ResultsPage() {
                 </div>
 
                 <div style={{ borderLeft: '1.5px solid var(--border)', paddingLeft: 20, display: 'flex', gap: 8 }}>
-                  <button className="btn btn-ghost" style={{ padding: 10, borderRadius: 12 }}><Maximize size={18} /></button>
-                  <button className="btn btn-ghost" style={{ padding: 10, borderRadius: 12 }}><Ruler size={18} /></button>
+                  <button 
+                    className="btn btn-ghost" 
+                    style={{ padding: 10, borderRadius: 12 }}
+                    onClick={() => {
+                      const el = document.getElementById('viewers-container');
+                      if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                      } else if (el) {
+                        el.requestFullscreen();
+                      }
+                    }}
+                    title={t('results.fullscreen')}
+                  >
+                    <Maximize size={18} />
+                  </button>
+                  <button 
+                    className="btn btn-ghost" 
+                    style={{ padding: 10, borderRadius: 12 }}
+                    onClick={() => toast('Tizim kalibrlanmagan. O\'lchash xizmati keyingi versiyada qo\'shiladi', { icon: '📏' })}
+                    title="O'lchash"
+                  >
+                    <Ruler size={18} />
+                  </button>
                 </div>
               </div>
 
               {/* Image Viewers */}
-              <div className="viewers-grid">
+              <div id="viewers-container" className="viewers-grid" style={{ backgroundColor: 'var(--bg-base)' }}>
                 {/* Original */}
                 <div style={{ position: 'relative' }}>
                   <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
