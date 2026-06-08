@@ -38,3 +38,4 @@ logs/
 .vscode/
 .idea/
 *.swp
+*.zip
